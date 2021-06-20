@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb+srv://noneuf:Epervier85@devconnector.pff3z.mongodb.net/budgetor?retryWrites=true&w=majority",
+  "jwtSecret": "mySecretToken"
+}
