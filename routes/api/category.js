@@ -32,8 +32,8 @@ router.get("/me", auth, async (req, res) => {
 // @desc      Create or update users category
 // @access    Private
 router.post(
-  "/check",
-  [auth, [check("status", "Status is required").not().isEmpty()]],
+  "/",
+  [auth, [check("categoryName", "Category is required").not().isEmpty()]],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -45,21 +45,22 @@ router.post(
     // Build category object
     const categoryFields = {};
     categoryFields.user = req.user.id;
-    if (categoryName) categoryFields.location = categoryName;
 
+    if (categoryName) categoryFields.categoryName = categoryName;
+    // console.log(`***${JSON.stringify(categoryFields.categoryName)}***`);
     try {
-      let category = await Category.findOne({ user: req.user.id });
-
+      // console.log("!!!!" + categoryName + "!!!!!");
+      let category = await Category.findOne({
+        categoryName: categoryName,
+        user: req.user.id,
+      });
+      // console.log(`##${category}##`);
+      // categoryName: req.categoryName
       if (category) {
-        //If category exists so we Update it
-        category = await Category.findOneAndUpdate(
-          { user: req.user.id },
-          {
-            $set: /*what is $set in mongoose: https://docs.mongodb.com/manual/reference/operator/aggregation/set/  */ categoryFields,
-          },
-          { new: true } //set the "new" option to "true" to return the document after update was applied
-        );
-        return res.json(category);
+        //If category existswe dont want to create it again, but we return a message to the user to inform him that the category allready exists
+
+        const categoryAlreadyExistsMsg = `Category "${categoryName}" allready exists`;
+        return res.send(categoryAlreadyExistsMsg);
       }
 
       //Else category does not exists so we Create it
