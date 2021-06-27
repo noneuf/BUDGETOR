@@ -5,31 +5,9 @@ const { check, validationResult } = require("express-validator");
 
 const Category = require("../../models/Category");
 const User = require("../../models/Category");
-// @route     GET api/category/me
-// @desc      Get current users category
-// @access    Public
-router.get("/me", auth, async (req, res) => {
-  try {
-    const category = await Category.findOne({ user: req.user.id }).populate(
-      "user", //from where you want to take the the info
-      ["name", "avatar"] // what you want to get from the user
-    );
-
-    if (!category) {
-      return res
-        .status(400)
-        .json({ msg: "There is no category for this user" });
-    }
-
-    res.json(category);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
-});
 
 // @route     POST api/category
-// @desc      Create or update users category
+// @desc      Create or update user category
 // @access    Private
 router.post(
   "/",
@@ -47,15 +25,14 @@ router.post(
     categoryFields.user = req.user.id;
 
     if (categoryName) categoryFields.categoryName = categoryName;
-    // console.log(`***${JSON.stringify(categoryFields.categoryName)}***`);
+
     try {
-      // console.log("!!!!" + categoryName + "!!!!!");
       let category = await Category.findOne({
         categoryName: categoryName,
         user: req.user.id,
       });
-      // console.log(`##${category}##`);
-      // categoryName: req.categoryName
+      console.log(category);
+
       if (category) {
         //If category existswe dont want to create it again, but we return a message to the user to inform him that the category allready exists
 
