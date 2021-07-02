@@ -4,11 +4,11 @@ const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
 
 const Outcome = require("../../models/Outcome");
-const User = require("../../models/Outcome");
+const User = require("../../models/User");
 
-// @route     POST api/outcome
-// @desc      Create or update outcome outcome
-// @access    Private
+//@route     POST api/outcome
+//@desc      Create or update outcome
+//@access    Private
 router.post(
   "/",
   [
@@ -58,5 +58,44 @@ router.post(
     }
   }
 );
+
+// @route     GET api/outcome
+// @desc      Get all Outcomes
+// @access    private
+router.get("/", auth, async (req, res) => {
+  try {
+    const outcomes = await Outcome.find().populate("outcome", [
+      "amount",
+      "description",
+    ]);
+    res.json(outcomes);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route     GET api/outcome/category/:category_id
+// @desc      Get outcomes by category ID
+// @access    Public
+router.get("/category/:category_id", async (req, res) => {
+  try {
+    const outcomes = await Outcome.find({
+      category: req.params.category_id,
+    }).populate("category", ["categoryName"]);
+
+    if (!outcomes) return res.status(400).json({ msg: "Outcome(s) not found" });
+
+    res.json(outcomes);
+  } catch (err) {
+    console.error(err.message);
+    // If the error is in the id we pass in ass a parmater of the request we want to return a specific message saying thecategory is not found
+    if (err.kind == "ObjectId") {
+      return res.status(400).json({ msg: "Outcome(s) not found" });
+    }
+    // if its any error that as nothing to do with the category id we return server error message
+    res.status(500).send("Server Error");
+  }
+});
 
 module.exports = router;
