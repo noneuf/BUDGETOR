@@ -109,4 +109,42 @@ router.put(
   }
 );
 
+// @route     DELETE api/category/:cat_id
+// @desc      Delete category
+// @access    Private
+router.delete("/:cat_id", auth, async (req, res) => {
+  try {
+    // @todo - remove category
+    console.log(req.params.cat_id);
+    await Category.findOneAndDelete({ _id: req.params.cat_id });
+    res.json({ msg: "Category deleted" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route     DELETE api/category/cat_id:/:out_id
+// @desc      Delete category
+// @access    Private
+router.delete("/:cat_id/:out_id", auth, async (req, res) => {
+  try {
+    const category = await Category.findOne({ _id: req.params.cat_id });
+
+    //Get outcome remove index
+    const removeIndex = category.outcome
+      .map((item) => item.id)
+      .indexOf(req.params.out_id);
+
+    category.outcome.splice(removeIndex, 1);
+
+    await category.save();
+
+    res.json({ category });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 module.exports = router;
