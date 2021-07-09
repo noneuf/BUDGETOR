@@ -13,6 +13,21 @@ const CategorySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  outcome: [
+    {
+      outcomeDescription: {
+        type: String,
+      },
+      amount: {
+        type: Number,
+        required: true,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 module.exports = Categories = mongoose.model("category", CategorySchema);

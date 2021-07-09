@@ -4,7 +4,7 @@ const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
 
 const Category = require("../../models/Category");
-const User = require("../../models/Category");
+const User = require("../../models/User");
 
 // @route     POST api/category
 // @desc      Create or update user category
@@ -52,22 +52,6 @@ router.post(
   }
 );
 
-// @route     GET api/category
-// @desc      Get all categories
-// @access    Public
-router.get("/", async (req, res) => {
-  try {
-    const categories = await Category.find().populate("user", [
-      "name",
-      "avatar",
-    ]);
-    res.json(categories);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
-});
-
 // @route     GET api/category/user/:user_id
 // @desc      Get category by user ID
 // @access    Public
@@ -90,5 +74,39 @@ router.get("/user/:user_id", async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
+
+// @route     PUT api/category/:category_id/outcome
+// @desc      Add category outcome
+// @access    Private
+router.put(
+  "/outcome/:cat_id",
+  [auth, [check("amount", "Amount is required").not().isEmpty()]],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { amount, outcomeDescription } = req.body;
+
+    const newOutcome = {
+      amount, //remember this is a shortened syntax for: title: title
+      outcomeDescription,
+    };
+
+    try {
+      const category = await Category.findById(req.params.cat_id); //Make sure to do something.findById(req.params.cat_id) instead of something.findById({category: req.params.cat_id})
+
+      category.outcome.unshift(newOutcome); // The unshift() method adds new items to the beginning of an array, and returns the new length
+
+      await category.save();
+
+      res.json(category);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
+    }
+  }
+);
 
 module.exports = router;
